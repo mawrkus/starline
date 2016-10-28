@@ -6,7 +6,7 @@ This package uses the [GitHub API](https://developer.github.com/v3/activity/star
 
 ## Installation
 
-For now, via git clone only:
+The package needs **node >= 6** and for now, can be installed via `git clone` only:
 
 ```shell
 $ git clone https://github.com/mawrkus/starline.git
