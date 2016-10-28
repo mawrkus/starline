@@ -11,6 +11,7 @@ For now, via git clone only:
 ```shell
 $ git clone https://github.com/mawrkus/starline.git
 $ cd starline
+$ npm install
 ```
 At this stage you will need to generate a personal access token. This can be easily done by logging in to GitHub then `Profile Settings > Personal access token`. Once generated, place it in a `.env` file:
 
