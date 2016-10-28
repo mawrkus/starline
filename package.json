@@ -1,0 +1,31 @@
+{
+  "name": "starline",
+  "version": "0.1.0",
+  "description": "Visualize the timeline of the stars given to a GitHub repository",
+  "author": "mawrkus <web@sparring-partner.be>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mawrkus/starline.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "precollect:stars": "rm -f web/data/data.tsv",
+    "collect:stars": "node index.js",
+    "server": "http-server ./web"
+  },
+  "keywords": [
+    "stars",
+    "visualize",
+    "github",
+    "stargazer",
+    "d3"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.15.2",
+    "dotenv": "^2.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^0.9.0"
+  }
+}
