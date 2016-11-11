@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "axios": "^0.15.2",
     "bottleneck": "^1.15.0",
     "debug": "^2.3.2",
     "dotenv": "^2.0.0",

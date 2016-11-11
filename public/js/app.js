@@ -63,7 +63,7 @@ function initSocket({ listElement }) {
     itemElement.classList.add('list-group-item-danger');
 
     const badgeElement = itemElement.querySelector('.badge');
-    badgeElement.innerHTML = 'error';
+    badgeElement.innerHTML = error;
   });
 }
 

@@ -1,13 +1,14 @@
+// must be before next requires to enable debug
+process.env.DEBUG = 'stars:*';
+
 const http = require('http');
 const path = require('path');
 const express = require('express');
 const mustache = require('mustache-express');
 const lowdb = require('lowdb');
+const axios = require('axios');
 const envalid = require('envalid');
-
-// must be before next requires to enable debug
-process.env.DEBUG = 'stars:*';
-
+const debug = require('debug')('stars:http');
 const StarsCollector = require('./stars-collector');
 const IOServer = require('./io-server');
 const HomeController = require('./home-controller');
@@ -32,6 +33,8 @@ const env = envalid.cleanEnv(process.env, {
   })
 });
 
+debug('starting HTTP server...');
+
 const app = express();
 const httpServer = http.Server(app);
 
@@ -42,8 +45,18 @@ const dbPath = path.join(cwd, env.DB_PATH, 'stars.json');
 
 /* IO */
 
+const REQUEST_TIMEOUT = 10000;
+const httpClient = axios.create({
+  method: 'get',
+  baseURL: `https://api.github.com/repos`,
+  timeout: REQUEST_TIMEOUT,
+  params: {
+    access_token: env.GITHUB_ACCESS_TOKEN
+  }
+});
+const starsCollector = new StarsCollector({ httpClient });
+
 const starsDb = lowdb(dbPath);
-const starsCollector = new StarsCollector();
 const ioServer = new IOServer({ httpServer, starsCollector, starsDb });
 
 ioServer.init();

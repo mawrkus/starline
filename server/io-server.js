@@ -3,6 +3,7 @@ const debug = require('debug')('stars:io');
 
 class IOServer {
   constructor({ httpServer, starsCollector, starsDb }) {
+    debug('Building IO server...');
     this._io = io(httpServer);
     this._starsCollector = starsCollector;
     this._repos = starsDb.get('repos');
@@ -32,7 +33,7 @@ class IOServer {
         this._io.sockets.emit('collect:status', { uri, progress });
       })
       .on('success', ({ uri, stars }) => {
-        debug('"%s" done!', uri, stars);
+        debug('"%s" done! %d star(s).', uri, stars.count);
         this._repos.find({ uri }).assign({ status: 'ok', stars }).value();
         this._io.sockets.emit('collect:success', { uri, stars });
       })
