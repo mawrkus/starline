@@ -1,34 +1,29 @@
 {
-  "name": "starline",
+  "name": "socket",
   "version": "0.1.0",
-  "description": "Visualize the timeline of the stars given to a GitHub repository",
-  "author": "mawrkus <web@sparring-partner.be>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mawrkus/starline.git"
-  },
+  "description": "",
   "main": "index.js",
-  "scripts": {
-    "precollect:stars": "rm -f web/data/data.tsv",
-    "collect:stars": "node index.js",
-    "server": "http-server ./web"
-  },
-  "keywords": [
-    "stars",
-    "visualize",
-    "github",
-    "stargazer",
-    "d3"
-  ],
-  "license": "MIT",
   "dependencies": {
-    "axios": "^0.15.2",
-    "dotenv": "^2.0.0"
+    "bottleneck": "^1.15.0",
+    "debug": "^2.3.2",
+    "dotenv": "^2.0.0",
+    "envalid": "^2.4.1",
+    "express": "^4.14.0",
+    "lowdb": "^0.14.0",
+    "mustache-express": "^1.2.2",
+    "nodemon": "^1.11.0",
+    "socket.io": "^1.5.1"
   },
   "devDependencies": {
-    "http-server": "^0.9.0"
+    "eslint": "^3.9.1",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-import": "^2.2.0"
   },
-  "engines" : {
-    "node" : ">=6.0.0"
-  }
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Marc Mignonsin <marc.mignonsin@softonic.com>",
+  "license": "Apache-2.0"
 }
