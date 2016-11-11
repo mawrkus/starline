@@ -30,7 +30,7 @@
       <ul id="list" class="list-group">
         {{ #repos }}
         <!-- todo partial success/error class -->
-        <li id="{{ id }}" class="list-group-item list-group-item-success">
+        <li id="{{ id }}" class="list-group-item">
           <a href="/repos/{{ uri }}" data-href="/repos/{{ uri }}" class="link" title="View starline">{{ uri }}</a>
           <span class="badge">{{ stars.count }} ⭐</span>
         </li>

@@ -10,7 +10,7 @@ process.env.DEBUG = 'stars:*';
 
 const StarsCollector = require('./stars-collector');
 const IOServer = require('./io-server');
-const Router = require('./router');
+const HomeController = require('./home-controller');
 
 require('dotenv').config();
 
@@ -56,7 +56,9 @@ app.set('views', viewsPath);
 app.set('view cache', env.NODE_ENV === 'production');
 app.engine('tpl', mustache());
 
-app.use(Router);
+const homeController = new HomeController({ starsDb });
+
+app.get('/', homeController.handle.bind(homeController));
 
 app.use((req, res, next) => {
   if (req.socket.listeners('error').length) {
