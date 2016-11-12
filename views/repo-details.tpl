@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Visualize the timeline of the stars given to a GitHub repository.">
+    <meta name="description" content="Visualize the timeline of the stars given to any GitHub repository.">
     <title>💫 Starline - {{ repo.uri }}</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
       .axis--x path {
         display: none;
@@ -16,24 +16,18 @@
         stroke: steelblue;
         stroke-width: 1.5px;
       }
-      .jumbotron h1 {
-        font-size: 36px;
-        margin-top: 0;
-      }
-      .jumbotron h4 {
-        margin-left: 30px;
-      }
-      .jumbotron ul {
-        margin-left: 10px;
-      }
-      .jumbotron {
-        font-size: 12px;
-        padding: 24px 0;
+      .page-header {
+        padding: 0;
         margin: 0;
         position: relative;
       }
-
-      .jumbotron .back {
+      small {
+        margin-left: 20px;
+      }
+      ul {
+        list-style-type: square;
+      }
+      .page-header .back {
         font-size: 12px;
         position: absolute;
         top: 18px;
@@ -43,17 +37,17 @@
   </head>
   <body>
     <div class="container">
-      <div class="jumbotron">
+      <div class="page-header">
         <h1>
           💫 <a href="{{ repo.url }}" target="_blank" title="View GitHub page">{{ repo.uri }}</a>
+          <br /><small>{{ repo.description }}</small>
         </h1>
-        <h4>{{ repo.description }}</h4>
         <ul>
           <li>Creation: <strong>{{ repo.created }}</strong></li>
           <li>Last update: <strong>{{ repo.updated }}</strong></li>
           <li><strong>{{ repo.stars.count }}</strong> stars</li>
         </ul>
-        <a href="/" class="back">&lt; back</a>
+        <a href="/" class="back" title="Back home">&lt; back</a>
       </div>
       <svg width="1140" height="600"></svg>
     </div>

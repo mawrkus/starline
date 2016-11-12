@@ -14,7 +14,7 @@ class HomeController {
                     .map(repo => Object.assign({ id: slugify(repo.uri) }, repo))
                     .value() || [];
 
-    res.render('index.tpl', { repos });
+    res.render('home.tpl', { repos });
   }
 }
 
