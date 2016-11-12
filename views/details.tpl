@@ -43,8 +43,8 @@
           <br /><small>{{ repo.description }}</small>
         </h1>
         <ul>
-          <li>📅 <strong>{{ repo.created }}</strong> -&gt; <strong>{{ repo.updated }}</strong> (last update)</li>
-          <li><strong>{{ repo.stars.count }}</strong> stars</li>
+          <li>📅 <strong>{{ repo.created }}</strong> --&gt; <strong>{{ repo.updated }}</strong> (last update)</li>
+          <li>⭐ <strong>{{ repo.stars.count }}</strong> stars in total.</li>
         </ul>
         <a href="/" class="back" title="Back home">&lt; back</a>
       </div>
@@ -94,7 +94,7 @@
           .attr("y", 6)
           .attr("dy", "0.71em")
           .style("text-anchor", "end")
-          .text("# of stars");
+          .text("⭐");
 
       g.append("path")
           .datum(data)

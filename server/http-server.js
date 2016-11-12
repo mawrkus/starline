@@ -11,8 +11,9 @@ const envalid = require('envalid');
 const debug = require('debug')('stars:http');
 const StarsCollector = require('./stars-collector');
 const IOServer = require('./io-server');
-const HomeController = require('./home-controller');
-const RepoDetailsController = require('./repo-details-controller');
+const HomeController = require('./controllers/home');
+const DetailsController = require('./controllers/details');
+const ErrorController = require('./controllers/error');
 
 require('dotenv').config();
 
@@ -79,10 +80,10 @@ app.set('view cache', env.NODE_ENV === 'production');
 app.engine('tpl', mustache());
 
 const homeController = new HomeController({ starsDb });
-app.get('/', homeController.handle.bind(homeController));
+app.get('/', homeController.handler.bind(homeController));
 
-const repoDetailsController = new RepoDetailsController({ starsDb });
-app.get('/repos/:userSlug/:repoSlug', repoDetailsController.handle.bind(repoDetailsController));
+const detailsController = new DetailsController({ starsDb });
+app.get('/repos/:userSlug/:repoSlug', detailsController.handler.bind(detailsController));
 
 app.use((req, res, next) => {
   if (req.socket.listeners('error').length) {
@@ -95,6 +96,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+const errorController = new ErrorController();
+app.use(errorController.handler.bind(errorController));
 
 httpServer.listen(env.SERVER_PORT, () => {
   console.log('Server listening on *:%d...', env.SERVER_PORT);

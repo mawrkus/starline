@@ -9,7 +9,7 @@ class HomeController {
     this._repos = starsDb.get('repos');
   }
 
-  handle(req, res) {
+  handler(req, res) {
     const repos = this._repos
                     .map(repo => Object.assign({ id: slugify(repo.uri) }, repo))
                     .value() || [];

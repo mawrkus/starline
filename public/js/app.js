@@ -17,6 +17,7 @@ function createItemIfNeeded({ listElement, uri }) {
 
     itemElement.classList.remove('list-group-item-success');
     itemElement.classList.remove('list-group-item-danger');
+    itemElement.classList.remove('list-group-item-info');
     itemElement.classList.remove('active');
 
     return { itemElement, badgeElement: itemElement.querySelector('.badge') };
@@ -46,8 +47,8 @@ function bindSocketEvents({ listElement }) {
 
     const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
 
-    itemElement.classList.add('active');
-    badgeElement.innerHTML = `? ⭐`;
+    itemElement.classList.add('list-group-item-info');
+    badgeElement.innerHTML = `queued`;
   });
 
   socket.on('collect:status', ({ uri, progress, total }) => {
@@ -75,7 +76,7 @@ function bindSocketEvents({ listElement }) {
     const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
 
     itemElement.classList.add('list-group-item-danger');
-    badgeElement.innerHTML = 'error!';
+    badgeElement.innerHTML = `Error: ${error}`;
   });
 
   return socket;

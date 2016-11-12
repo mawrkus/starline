@@ -8,12 +8,18 @@
     <title>💫 Starline</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
+      .alert {
+        margin: 10px 0 0;
+      }
       a.list-group-item, a.list-group-item:hover {
         font-weight: bold;
         color: #337ab7;
       }
       a.active {
         pointer-events: none;
+      }
+      .top {
+         background-color: #eee;
       }
     </style>
     <script src="/js/socket.io-1.2.0.js" defer></script>
@@ -33,11 +39,14 @@
             </span>
           </div>
         </form>
-        <div id="error" style="margin-top:20px" class="alert alert-danger hidden" role="alert">
-          Please enter a valid repository URI, e.g. : <strong>mawrkus/starline</strong>
+        <div id="error" class="alert alert-danger hidden" role="alert">
+          Please enter a valid user and repository, e.g. : <strong>mawrkus/starline</strong>
         </div>
       </div>
       <div id="list" class="list-group">
+        <div class="list-group-item top">
+          <strong>GitHub repositories</strong>
+        </div>
         {{ #repos }}
         <!-- todo partial success/error class -->
         <a

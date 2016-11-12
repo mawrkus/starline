@@ -8,7 +8,7 @@ class RepoDetailsController {
     this._repos = starsDb.get('repos');
   }
 
-  handle(req, res, next) {
+  handler(req, res, next) {
     const { userSlug, repoSlug } = req.params;
     const repoUri = `${userSlug}/${repoSlug}`;
     const repo = this._repos.find({ uri: repoUri }).value();
@@ -26,7 +26,7 @@ class RepoDetailsController {
       tsvFile
     });
 
-    res.render('repo-details.tpl', { repo: repoData });
+    res.render('details.tpl', { repo: repoData });
   }
 
   _buildTSVFile({ userSlug, repoSlug, dates }) {
