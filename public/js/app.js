@@ -1,6 +1,7 @@
-const socket = io();
+/* eslint-disable no-console */
+/* global document io */
 
-const REGEXP_URI = /^([\w-]+)\/([\w-]+)$/;
+const REGEXP_URI = /^([\w-.]+)\/([\w-.]+)$/;
 const REGEXP_SLUGIFY = /\//;
 
 function slugify(uri) {
@@ -9,79 +10,84 @@ function slugify(uri) {
 
 function createItemIfNeeded({ listElement, uri }) {
   const id = slugify(uri);
-
   let itemElement = document.getElementById(id);
+
   if (itemElement) {
-    const linkElement = itemElement.querySelector('.link');
-    linkElement.setAttribute('href', '#');
-    return itemElement;
+    itemElement.setAttribute('href', '#');
+
+    itemElement.classList.remove('list-group-item-success');
+    itemElement.classList.remove('list-group-item-danger');
+    itemElement.classList.remove('active');
+
+    return { itemElement, badgeElement: itemElement.querySelector('.badge') };
   }
 
-  itemElement = document.createElement('li');
+  itemElement = document.createElement('a');
   itemElement.id = id;
-  itemElement.className = 'list-group-item';
+  itemElement.className = 'link list-group-item';
+  itemElement.href = `/repos/${uri}`;
+  itemElement.setAttribute('data-href', itemElement.href);
+  itemElement.title = `View ${uri} starline`;
   itemElement.innerHTML = `
-    <a href= "#" data-href="/repos/${uri}" class="link" title="View starline">${uri}</a>
-    <span class="badge"></span>
+    <span class="uri">${uri}</span>
+    <span class="badge">? ⭐</span>
   `;
 
   listElement.appendChild(itemElement);
 
-  return itemElement;
+  return { itemElement, badgeElement: itemElement.querySelector('.badge') };
 }
 
-function initSocket({ listElement }) {
+function bindSocketEvents({ listElement }) {
+  const socket = io();
+
   socket.on('collect:start', ({ uri }) => {
     console.info('collect:start', uri);
 
-    const itemElement = createItemIfNeeded({ listElement, uri });
-    itemElement.classList.remove('list-group-item-success');
-    itemElement.classList.remove('list-group-item-danger');
+    const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
 
-    const badgeElement = itemElement.querySelector('.badge');
+    itemElement.classList.add('active');
     badgeElement.innerHTML = `? ⭐`;
   });
 
   socket.on('collect:status', ({ uri, progress, total }) => {
     console.log('collect:status', uri, progress, total);
 
-    const itemElement = createItemIfNeeded({ listElement, uri });
+    const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
 
-    const badgeElement = itemElement.querySelector('.badge');
+    itemElement.classList.add('active');
     badgeElement.innerHTML = `${progress}/${total} ⭐`;
   });
 
   socket.on('collect:success', ({ uri, starsCount }) => {
     console.info('collect:success', uri, starsCount);
 
-    const itemElement = createItemIfNeeded({ listElement, uri });
+    const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
+
     itemElement.classList.add('list-group-item-success');
-
-    const badgeElement = itemElement.querySelector('.badge');
+    itemElement.setAttribute('href', itemElement.getAttribute('data-href'));
     badgeElement.innerHTML = `${starsCount} ⭐`;
-
-    const linkElement = itemElement.querySelector('.link');
-    linkElement.setAttribute('href', linkElement.getAttribute('data-href'));
   });
 
   socket.on('collect:error', ({ uri, error }) => {
     console.error('collect:error', uri, error);
 
-    const itemElement = createItemIfNeeded({ listElement, uri });
-    itemElement.classList.add('list-group-item-danger');
+    const { itemElement, badgeElement } = createItemIfNeeded({ listElement, uri });
 
-    const badgeElement = itemElement.querySelector('.badge');
-    badgeElement.innerHTML = 'error';
+    itemElement.classList.add('list-group-item-danger');
+    badgeElement.innerHTML = 'error!';
   });
+
+  return socket;
 }
 
-function init() {
+function bootstrap() {
   const formElement = document.getElementById('form');
   const inputElement = document.getElementById('input');
   const listElement = document.getElementById('list');
   const errorMessageElement = document.getElementById('error');
 
-  initSocket({ listElement });
+  const socket = bindSocketEvents({ listElement });
 
   formElement.addEventListener('submit', event => {
     event.preventDefault();
@@ -89,7 +95,7 @@ function init() {
     const uri = inputElement.value.trim();
 
     if (REGEXP_URI.test(uri)) {
-      console.log('Submitting request for "%s"...', uri);
+      console.info('Submitting request for "%s"...', uri);
 
       inputElement.value = '';
       errorMessageElement.classList.add('hidden');
@@ -101,4 +107,4 @@ function init() {
   });
 }
 
-init();
+bootstrap();

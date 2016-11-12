@@ -12,6 +12,9 @@
         font-weight: bold;
         color: #337ab7;
       }
+      a.active {
+        pointer-events: none;
+      }
     </style>
     <script src="/js/socket.io-1.2.0.js" defer></script>
     <script src="/js/app.js" defer></script>
@@ -20,9 +23,10 @@
     <div class="container">
       <div class="jumbotron">
         <h1>💫 Starline</h1>
-        <p>Visualize the timeline of the stars given to any GitHub repository.</p>
+        <p>Visualize the timeline of the stars given to any GitHub repository. More projects? Search <a href="https://www.npmjs.com/" target="_blank">npm</a> or <a href="https://github.com/search" target="_blank">GitHub</a>.</p>
         <form id="form" action="/">
           <div class="input-group">
+            <span class="input-group-addon">github.com/</span>
             <input type="text" id="input" class="form-control" placeholder="user/repo">
             <span class="input-group-btn">
               <button class="btn btn-default btn-primary" type="submit">Collect stars!</button>
@@ -41,7 +45,7 @@
           data-href="/repos/{{ uri }}"
           id="{{ id }}"
           class="link list-group-item"
-          title="View starline">
+          title="View {{ uri }} starline">
             <span class="uri">{{ uri }}</span>
             <span class="badge">{{ stars.count }} ⭐</span>
         </a>

@@ -43,8 +43,7 @@
           <br /><small>{{ repo.description }}</small>
         </h1>
         <ul>
-          <li>Creation: <strong>{{ repo.created }}</strong></li>
-          <li>Last update: <strong>{{ repo.updated }}</strong></li>
+          <li>📅 <strong>{{ repo.created }}</strong> -&gt; <strong>{{ repo.updated }}</strong> (last update)</li>
           <li><strong>{{ repo.stars.count }}</strong> stars</li>
         </ul>
         <a href="/" class="back" title="Back home">&lt; back</a>
