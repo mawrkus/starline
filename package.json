@@ -10,7 +10,9 @@
     "dotenv": "^2.0.0",
     "envalid": "^2.4.1",
     "express": "^4.14.0",
+    "http-errors": "^1.5.0",
     "lowdb": "^0.14.0",
+    "moment": "^2.16.0",
     "mustache-express": "^1.2.2",
     "nodemon": "^1.11.0",
     "socket.io": "^1.5.1"

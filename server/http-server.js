@@ -12,6 +12,7 @@ const debug = require('debug')('stars:http');
 const StarsCollector = require('./stars-collector');
 const IOServer = require('./io-server');
 const HomeController = require('./home-controller');
+const RepoDetailsController = require('./repo-details-controller');
 
 require('dotenv').config();
 
@@ -21,12 +22,20 @@ const env = envalid.cleanEnv(process.env, {
     default: 'production'
   }),
   SERVER_PORT: envalid.num({
-    desc: 'Server port number. E.g.: 3000',
-    default: 3000
+    desc: 'Server port number. E.g.: 8000',
+    default: 8000
   }),
   STATICS_PATH: envalid.str({
     desc: 'Path to the static files. E.g.: "public"',
     default: 'public'
+  }),
+  VIEWS_PATH: envalid.str({
+    desc: 'Path to the client templates. E.g.: "views"',
+    default: 'views'
+  }),
+  DB_PATH: envalid.str({
+    desc: 'Path to the database. E.g.: "data"',
+    default: 'data'
   }),
   GITHUB_ACCESS_TOKEN: envalid.str({
     desc: 'GitHub API access token.'
@@ -70,8 +79,10 @@ app.set('view cache', env.NODE_ENV === 'production');
 app.engine('tpl', mustache());
 
 const homeController = new HomeController({ starsDb });
-
 app.get('/', homeController.handle.bind(homeController));
+
+const repoDetailsController = new RepoDetailsController({ starsDb });
+app.get('/repos/:userSlug/:repoSlug', repoDetailsController.handle.bind(repoDetailsController));
 
 app.use((req, res, next) => {
   if (req.socket.listeners('error').length) {

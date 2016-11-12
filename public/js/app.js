@@ -1,9 +1,10 @@
 const socket = io();
 
-const REGEXP_URI = /^(\w+)\/(\w+)$/;
+const REGEXP_URI = /^([\w-]+)\/([\w-]+)$/;
+const REGEXP_SLUGIFY = /\//;
 
 function slugify(uri) {
-  return uri.replace(/\//, '-');
+  return uri.replace(REGEXP_SLUGIFY, '-');
 }
 
 function createItemIfNeeded({ listElement, uri }) {
@@ -21,7 +22,7 @@ function createItemIfNeeded({ listElement, uri }) {
   itemElement.className = 'list-group-item';
   itemElement.innerHTML = `
     <a href= "#" data-href="/repos/${uri}" class="link" title="View starline">${uri}</a>
-    <span class="badge">0%</span>
+    <span class="badge"></span>
   `;
 
   listElement.appendChild(itemElement);
@@ -32,26 +33,32 @@ function createItemIfNeeded({ listElement, uri }) {
 function initSocket({ listElement }) {
   socket.on('collect:start', ({ uri }) => {
     console.info('collect:start', uri);
+
     const itemElement = createItemIfNeeded({ listElement, uri });
     itemElement.classList.remove('list-group-item-success');
     itemElement.classList.remove('list-group-item-danger');
+
+    const badgeElement = itemElement.querySelector('.badge');
+    badgeElement.innerHTML = `? ⭐`;
   });
 
-  socket.on('collect:status', ({ uri, progress }) => {
-    console.log('collect:status', uri, progress);
+  socket.on('collect:status', ({ uri, progress, total }) => {
+    console.log('collect:status', uri, progress, total);
+
     const itemElement = createItemIfNeeded({ listElement, uri });
 
     const badgeElement = itemElement.querySelector('.badge');
-    badgeElement.innerHTML = `${progress}%`;
+    badgeElement.innerHTML = `${progress}/${total} ⭐`;
   });
 
-  socket.on('collect:success', ({ uri, stars }) => {
-    console.info('collect:success', uri, stars);
+  socket.on('collect:success', ({ uri, starsCount }) => {
+    console.info('collect:success', uri, starsCount);
+
     const itemElement = createItemIfNeeded({ listElement, uri });
     itemElement.classList.add('list-group-item-success');
 
     const badgeElement = itemElement.querySelector('.badge');
-    badgeElement.innerHTML = `${stars.count} ⭐`;
+    badgeElement.innerHTML = `${starsCount} ⭐`;
 
     const linkElement = itemElement.querySelector('.link');
     linkElement.setAttribute('href', linkElement.getAttribute('data-href'));
@@ -59,11 +66,12 @@ function initSocket({ listElement }) {
 
   socket.on('collect:error', ({ uri, error }) => {
     console.error('collect:error', uri, error);
+
     const itemElement = createItemIfNeeded({ listElement, uri });
     itemElement.classList.add('list-group-item-danger');
 
     const badgeElement = itemElement.querySelector('.badge');
-    badgeElement.innerHTML = error;
+    badgeElement.innerHTML = 'error';
   });
 }
 
@@ -82,8 +90,10 @@ function init() {
 
     if (REGEXP_URI.test(uri)) {
       console.log('Submitting request for "%s"...', uri);
+
       inputElement.value = '';
       errorMessageElement.classList.add('hidden');
+
       socket.emit('collect:request', { uri });
     } else {
       errorMessageElement.classList.remove('hidden');

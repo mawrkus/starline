@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Visualize the timeline of the stars given to a GitHub repository.">
-    <title>Starline</title>
+    <title>💫 Starline</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="/js/socket.io-1.2.0.js" defer></script>
     <script src="/js/app.js" defer></script>
@@ -37,5 +37,5 @@
         {{ /repos }}
       </ul>
     </div>
-    </body>
+  </body>
 </html>
