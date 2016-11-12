@@ -1,12 +1,12 @@
 # 💫 Starline [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contribute)
 
-Visualize the timeline of the stars given to a GitHub repository. I. e. the number of stars given on any given day.
+Visualize the timeline of the stars given to any GitHub repository. I. e. the number of stars given on any given day.
 
 This package uses the [GitHub API](https://developer.github.com/v3/activity/starring/) to collect all the star creation timestamps. The data is visualized thanks to [D3](https://d3js.org/).
 
 ## Installation
 
-The package needs **node >= 6** and for now, can be installed via `git clone` only:
+The package needs **node >= 6** and for now, can be installed via `git clone` only (for now):
 
 ```shell
 $ git clone https://github.com/mawrkus/starline.git
@@ -21,13 +21,13 @@ $ echo GITHUB_ACCESS_TOKEN=[your github access token] > .env
 
 Check [GitHub's documentation](https://developer.github.com/v3/) for more information about the API and authentication in general.
 
-## Usage example
+## Usage
 
 ```shell
 $ npm start
 ```
 
-Open a Web browser, go to `http://localhost:8080`, et voilà!
+Open a Web browser, go to `http://localhost:8000`, et voilà!
 
 Is the repository sleepy, trendy, steady or just dead? I hope this tool will help.
 
