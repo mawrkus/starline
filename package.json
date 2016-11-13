@@ -1,6 +1,6 @@
 {
   "name": "starline",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Visualize the timeline of the stars given to any GitHub repository",
   "author": "mawrkus <web@sparring-partner.be>",
   "repository": {
