@@ -57,7 +57,7 @@ class IOServer {
       .on('error', ({ uri, error }) => {
         debug('Error collecting "%s"!', uri, error);
 
-        this._repos.find({ uri }).assign({ status: 'ko', error: error.message }).value();
+        this._repos.remove({ uri }).value();
         this._io.sockets.emit('collect:error', { uri, error: error.message });
       });
   }
