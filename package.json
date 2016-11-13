@@ -1,6 +1,6 @@
 {
   "name": "starline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Visualize the timeline of the stars given to any GitHub repository",
   "author": "mawrkus <web@sparring-partner.be>",
   "repository": {
@@ -42,7 +42,7 @@
     "d3"
   ],
   "license": "MIT",
-  "engines" : {
-    "node" : ">=6.0.0"
+  "engines": {
+    "node": ">=6.0.0"
   }
 }
