@@ -1,6 +1,6 @@
 {
   "name": "starline",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Visualize the timeline of the stars given to any GitHub repository",
   "author": "mawrkus <web@sparring-partner.be>",
   "repository": {
@@ -10,7 +10,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "release": "npm version -m \"New version: %s\"",
+    "postrelease": "npm run push && npm publish",
+    "push": "git push origin master && git push origin --tags"
   },
   "dependencies": {
     "axios": "^0.15.2",
