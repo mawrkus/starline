@@ -82,7 +82,7 @@ app.engine('tpl', mustache());
 const homeController = new HomeController({ starsDb });
 app.get('/', homeController.handler.bind(homeController));
 
-const detailsController = new DetailsController({ starsDb });
+const detailsController = new DetailsController({ starsDb, staticsPath });
 app.get('/repos/:userSlug/:repoSlug', detailsController.handler.bind(detailsController));
 
 app.use((req, res, next) => {

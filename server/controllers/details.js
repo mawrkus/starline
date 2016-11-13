@@ -4,8 +4,9 @@ const createError = require('http-errors');
 const moment = require('moment');
 
 class RepoDetailsController {
-  constructor({ starsDb }) {
+  constructor({ starsDb, staticsPath }) {
     this._repos = starsDb.get('repos');
+    this._staticsPath = staticsPath;
   }
 
   handler(req, res, next) {
@@ -31,7 +32,7 @@ class RepoDetailsController {
 
   _buildTSVFile({ userSlug, repoSlug, dates }) {
     const filename = `${userSlug}-${repoSlug}.tsv`;
-    const filePath = path.join(process.cwd(), process.env.STATICS_PATH, 'data', filename);
+    const filePath = path.join(this._staticsPath, 'data', filename);
 
     const starsCountPerDate = dates.sort().reduce((results, date) => {
       results[date] = results[date] || 0;
