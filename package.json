@@ -1,7 +1,7 @@
 {
   "name": "starline",
   "version": "0.1.0",
-  "description": "Visualize the timeline of the stars given to a GitHub repository",
+  "description": "Visualize the timeline of the stars given to any GitHub repository",
   "author": "mawrkus <web@sparring-partner.be>",
   "repository": {
     "type": "git",
@@ -9,9 +9,30 @@
   },
   "main": "index.js",
   "scripts": {
-    "precollect:stars": "rm -f web/data/data.tsv",
-    "collect:stars": "node index.js",
-    "server": "http-server ./web"
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "release": "npm version -m \"New version: %s\"",
+    "postrelease": "npm run push && npm publish",
+    "push": "git push origin master && git push origin --tags"
+  },
+  "dependencies": {
+    "axios": "^0.15.2",
+    "bottleneck": "^1.15.0",
+    "debug": "^2.3.2",
+    "dotenv": "^2.0.0",
+    "envalid": "^2.4.1",
+    "express": "^4.14.0",
+    "http-errors": "^1.5.0",
+    "lowdb": "^0.14.0",
+    "moment": "^2.16.0",
+    "mustache-express": "^1.2.2",
+    "socket.io": "^1.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.9.1",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "nodemon": "^1.11.0"
   },
   "keywords": [
     "stars",
@@ -21,13 +42,6 @@
     "d3"
   ],
   "license": "MIT",
-  "dependencies": {
-    "axios": "^0.15.2",
-    "dotenv": "^2.0.0"
-  },
-  "devDependencies": {
-    "http-server": "^0.9.0"
-  },
   "engines" : {
     "node" : ">=6.0.0"
   }
