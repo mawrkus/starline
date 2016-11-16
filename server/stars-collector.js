@@ -10,7 +10,7 @@ class StarsCollector extends EventEmitter {
     this._starsPerPage = 100; // max allowed by GitHub API
     this._maxConcurrentReqs = 10;
     this._minTimeBetweenReqs = 100;
-    this._limiter = new Bottleneck(this._maxConcurrent, this._minTimeBetweenReqs);
+    this._limiters = {};
   }
 
   get({ uri }) {
@@ -18,58 +18,55 @@ class StarsCollector extends EventEmitter {
 
     this._requestRepoStats({ uri })
       .then(repoStats => {
-        const starsCount = repoStats.stars.count;
-        const pagesCount = Math.ceil(starsCount / this._starsPerPage);
-        const allDates = {};
-        let pagesCollected = 0;
-        let progress = 0;
-
-        debug('"%s" stats: %d star(s) -> %d page(s).', uri, starsCount, pagesCount);
-
-        if (!starsCount) {
-          debug('"%s" -> nothing to do.', uri);
-          this.emit('success', repoStats);
-          return;
+        if (!repoStats.stars.count) {
+          return this._onSuccess({ repoStats });
         }
 
-        for (let page = 1; page <= pagesCount; page++) {
-          this._limiter.schedule(() => { // eslint-disable-line
-            return this._requestStarDates({ uri, page: page++ })
-              .then(dates => {
-                dates.forEach(date => {
-                  allDates[date] = allDates[date] || 0;
-                  allDates[date]++;
-                });
-                progress += dates.length;
-
-                debug('"%s" -> page %d/%d collected -> %d/%d ⭐', uri, ++pagesCollected, pagesCount, progress, starsCount);
-                this.emit('status', { uri, progress, total: starsCount });
-
-                if (pagesCollected >= pagesCount) {
-                  Object.assign(repoStats, {
-                    uri,
-                    stars: { count: progress, dates: allDates }
-                  });
-
-                  debug('"%s" -> done -> %d star(s).', uri, progress);
-                  this.emit('success', repoStats);
-                }
-              })
-              .catch(error => this._emitError({ uri, error }));
-          });
-        }
+        this._requestAll({ repoStats });
       })
-      .catch(error => this._emitError({ uri, error }));
+      .catch(error => this._onError({ uri, error }));
   }
 
-  _emitError({ uri, error }) {
-    debug('Error collecting "%s"!', uri, error);
+  _requestAll({ repoStats }) {
+    const { uri, stars } = repoStats;
+    const starsCountFromStats = stars.count;
+    const pagesCount = Math.ceil(starsCountFromStats / this._starsPerPage);
+    const allDates = {};
+    let pagesCollected = 0;
+    let progress = 0;
 
-    this._limiter.stopAll(true);
-    // when stopped, a limiter is useless, a new one must be created
-    this._limiter = new Bottleneck(this._maxConcurrent, this._minTimeBetweenReqs);
+    const limiter = new Bottleneck(this._maxConcurrent, this._minTimeBetweenReqs);
+    this._limiters[uri] = limiter;
 
-    this.emit('error', { uri, error });
+    debug('"%s" stats: %d star(s) -> %d page(s).', uri, starsCountFromStats, pagesCount);
+
+    for (let page = 1; page <= pagesCount; page++) {
+      limiter.schedule(() => { // eslint-disable-line
+        return this._requestStarDates({ uri, page: page++, pagesCount })
+          .then(dates => {
+            // no cancellation for now. ugly, for now.
+            if (!this._limiters[uri]) {
+              debug('"%s" already stopped', uri);
+              return;
+            }
+
+            dates.forEach(date => {
+              allDates[date] = allDates[date] || 0;
+              allDates[date]++;
+            });
+            progress += dates.length;
+
+            debug('"%s" -> page %d/%d done (%d/%d)', uri, ++pagesCollected, pagesCount, progress, starsCountFromStats);
+            this.emit('status', { uri, progress, total: starsCountFromStats });
+
+            if (pagesCollected >= pagesCount) {
+              repoStats.stars = { count: progress, dates: allDates };
+              this._onSuccess({ repoStats });
+            }
+          })
+          .catch(error => this._onError({ uri, error }));
+      });
+    }
   }
 
   _requestRepoStats({ uri }) {
@@ -89,8 +86,8 @@ class StarsCollector extends EventEmitter {
       });
   }
 
-  _requestStarDates({ uri, page }) {
-    debug('"%s" -> requesting page %d...', uri, page);
+  _requestStarDates({ uri, page, pagesCount }) {
+    debug('"%s" -> requesting page %d/%d...', uri, page, pagesCount);
 
     // it seems this will return all stars ever given, even if some if them were taken back...
     return this._httpClient({
@@ -104,6 +101,29 @@ class StarsCollector extends EventEmitter {
       }
     })
     .then(response => response.data.map(star => star.starred_at.split('T')[0]));
+  }
+
+  _onSuccess({ repoStats }) {
+    const { uri, stars } = repoStats;
+
+    debug('"%s" -> all done! %d ⭐', uri, stars.count);
+
+    this._cleanup({ uri });
+    this.emit('success', repoStats);
+  }
+
+  _onError({ uri, error }) {
+    debug('"%s" -> error! ❌', uri, error);
+
+    this._cleanup({ uri });
+    this.emit('error', { uri, error });
+  }
+
+  _cleanup({ uri }) {
+    if (this._limiters[uri]) {
+      this._limiters[uri].stopAll(true);
+      delete this._limiters[uri];
+    }
   }
 }
 
