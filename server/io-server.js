@@ -24,40 +24,36 @@ class IOServer {
 
   _bindStarsCollectorEvents() {
     this._starsCollector
-      .on('start', ({ uri }) => {
-        debug('Starting "%s"...', uri);
-        let repo = this._repos.find({ uri });
+      .on('start', repoStats => {
+        const { uri } = repoStats;
+        const collectMetas = {
+          collectStatus: 'started',
+          collectDate: new Date()
+        };
+        const repo = this._repos.find({ uri });
 
         if (!repo.value()) {
-          repo = { uri, status: 'started', stars: { count: 0, dates: [] } };
-          this._repos.push(repo).value();
+          this._repos.push(Object.assign(repoStats, collectMetas)).value();
         } else {
-          repo.assign({
-            status: 'started',
-            stars: { count: 0, dates: [] }
-          }).value();
+          repo.assign(collectMetas).value();
         }
 
         this._io.sockets.emit('collect:start', { uri }); // update ALL clients
       })
       .on('status', ({ uri, progress, total }) => {
-        debug('"%s": %d/%d ⭐', uri, progress, total);
         this._io.sockets.emit('collect:status', { uri, progress, total });
       })
       .on('success', repoStats => {
         const { uri, stars } = repoStats;
-        Object.assign(repoStats, { status: 'ok' });
+        const repo = this._repos.find({ uri });
 
-        debug('"%s" done! %d star(s).', uri, stars.count);
-
-        this._repos.find({ uri }).assign(repoStats).value();
+        repo.assign(Object.assign(repoStats, { collectStatus: 'ok' })).value();
 
         this._io.sockets.emit('collect:success', { uri, starsCount: stars.count });
       })
       .on('error', ({ uri, error }) => {
-        debug('Error collecting "%s"!', uri, error);
-
         this._repos.remove({ uri }).value();
+
         this._io.sockets.emit('collect:error', { uri, error: error.message });
       });
   }

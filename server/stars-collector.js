@@ -8,12 +8,13 @@ class StarsCollector extends EventEmitter {
     super();
     this._httpClient = httpClient;
     this._starsPerPage = 100; // max allowed by GitHub API
-    this._rps = 10;
-    this._limiter = new Bottleneck(this._rps, 100);
+    this._maxConcurrentReqs = 10;
+    this._minTimeBetweenReqs = 100;
+    this._limiter = new Bottleneck(this._maxConcurrent, this._minTimeBetweenReqs);
   }
 
   get({ uri }) {
-    this.emit('start', { uri });
+    this.emit('start', { uri, stars: { count: 0, dates: [] } });
 
     this._requestRepoStats({ uri })
       .then(repoStats => {
@@ -22,7 +23,7 @@ class StarsCollector extends EventEmitter {
         let allDates = [];
         let pagesCollected = 0;
 
-        debug('"%s" has %d star(s) -> %d page(s) at %d req/s.', uri, starsCount, pagesCount, this._rps);
+        debug('"%s" has %d star(s) -> %d page(s)', uri, starsCount, pagesCount);
 
         if (!starsCount) {
           Object.assign(repoStats, { uri, stars: { count: 0, dates: [] } });
@@ -32,13 +33,12 @@ class StarsCollector extends EventEmitter {
 
         for (let page = 1; page <= pagesCount; page++) {
           this._limiter.schedule(() => { // eslint-disable-line
-            debug('Requesting page %d/%d...', page, pagesCount);
+            debug('"%s" -> requesting page %d/%d...', uri, page, pagesCount);
 
             return this._requestStarDates({ uri, page: page++ })
               .then(dates => {
                 allDates = allDates.concat(dates);
-                debug('Page %d/%d collected.', ++pagesCollected, pagesCount);
-
+                debug('"%s" -> page %d/%d collected: %d/%d ⭐', uri, ++pagesCollected, pagesCount, allDates.length, starsCount);
                 this.emit('status', { uri, progress: allDates.length, total: starsCount });
 
                 if (pagesCollected >= pagesCount) {
@@ -47,17 +47,29 @@ class StarsCollector extends EventEmitter {
                     stars: { count: allDates.length, dates: allDates }
                   });
 
+                  debug('"%s" -> done: %d star(s) collected.', uri, allDates.length);
                   this.emit('success', repoStats);
                 }
               })
-              .catch(error => this.emit('error', { uri, error }));
+              .catch(error => this._emitError({ uri, error }));
           });
         }
       })
-      .catch(error => this.emit('error', { uri, error }));
+      .catch(error => this._emitError({ uri, error }));
+  }
+
+  _emitError({ uri, error }) {
+    debug('Error collecting "%s"!', uri, error);
+
+    this._limiter.stopAll(true);
+    // when stopped, a limiter is useless, a new one must be created
+    this._limiter = new Bottleneck(this._maxConcurrent, this._minTimeBetweenReqs);
+
+    this.emit('error', { uri, error });
   }
 
   _requestRepoStats({ uri }) {
+    debug('Requesting "%s" stats...', uri);
     return this._httpClient({ url: uri })
       .then(response => {
         const data = response.data;
