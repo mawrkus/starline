@@ -20,34 +20,38 @@ class StarsCollector extends EventEmitter {
       .then(repoStats => {
         const starsCount = repoStats.stars.count;
         const pagesCount = Math.ceil(starsCount / this._starsPerPage);
-        let allDates = [];
+        const allDates = {};
         let pagesCollected = 0;
+        let progress = 0;
 
-        debug('"%s" has %d star(s) -> %d page(s)', uri, starsCount, pagesCount);
+        debug('"%s" stats: %d star(s) -> %d page(s).', uri, starsCount, pagesCount);
 
         if (!starsCount) {
-          Object.assign(repoStats, { uri, stars: { count: 0, dates: [] } });
+          debug('"%s" -> nothing to do.', uri);
           this.emit('success', repoStats);
           return;
         }
 
         for (let page = 1; page <= pagesCount; page++) {
           this._limiter.schedule(() => { // eslint-disable-line
-            debug('"%s" -> requesting page %d/%d...', uri, page, pagesCount);
-
             return this._requestStarDates({ uri, page: page++ })
               .then(dates => {
-                allDates = allDates.concat(dates);
-                debug('"%s" -> page %d/%d collected: %d/%d ⭐', uri, ++pagesCollected, pagesCount, allDates.length, starsCount);
-                this.emit('status', { uri, progress: allDates.length, total: starsCount });
+                dates.forEach(date => {
+                  allDates[date] = allDates[date] || 0;
+                  allDates[date]++;
+                });
+                progress += dates.length;
+
+                debug('"%s" -> page %d/%d collected -> %d/%d ⭐', uri, ++pagesCollected, pagesCount, progress, starsCount);
+                this.emit('status', { uri, progress, total: starsCount });
 
                 if (pagesCollected >= pagesCount) {
                   Object.assign(repoStats, {
                     uri,
-                    stars: { count: allDates.length, dates: allDates }
+                    stars: { count: progress, dates: allDates }
                   });
 
-                  debug('"%s" -> done: %d star(s) collected.', uri, allDates.length);
+                  debug('"%s" -> done -> %d star(s).', uri, progress);
                   this.emit('success', repoStats);
                 }
               })
@@ -70,20 +74,24 @@ class StarsCollector extends EventEmitter {
 
   _requestRepoStats({ uri }) {
     debug('Requesting "%s" stats...', uri);
+
     return this._httpClient({ url: uri })
       .then(response => {
         const data = response.data;
         return {
+          uri,
+          stars: { count: data.stargazers_count, dates: [] },
           url: data.html_url,
           description: data.description,
           created: data.created_at,
           updated: data.updated_at,
-          stars: { count: data.stargazers_count }
         };
       });
   }
 
   _requestStarDates({ uri, page }) {
+    debug('"%s" -> requesting page %d...', uri, page);
+
     // it seems this will return all stars ever given, even if some if them were taken back...
     return this._httpClient({
       url: `${uri}/stargazers`,

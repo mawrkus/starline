@@ -34,16 +34,11 @@ class RepoDetailsController {
     const filename = `${userSlug}-${repoSlug}.tsv`;
     const filePath = path.join(this._staticsPath, 'data', filename);
 
-    const starsCountPerDate = dates.sort().reduce((results, date) => {
-      results[date] = results[date] || 0;
-      results[date]++;
-      return results;
-    }, {});
-
     console.log('Building TSV file "%s"...', filePath);
 
-    const lines = Object.keys(starsCountPerDate)
-      .map(date => `${date}\t\t\t${starsCountPerDate[date]}`)
+    const lines = Object.keys(dates)
+      .sort()
+      .map(date => `${date}\t\t\t${dates[date]}`)
       .join('\n');
 
     const tsv = `date\t\t\tstars\n${lines}`;
