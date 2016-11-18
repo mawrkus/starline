@@ -19,29 +19,29 @@ class RepoDetailsController {
       return next(error);
     }
 
-    const tsvFile = this._buildTSVFile({ userSlug, repoSlug, dates: repo.stars.dates });
+    const dataFile = this._buildCSVFile({ userSlug, repoSlug, dates: repo.stars.dates });
 
     const repoData = Object.assign({}, repo, {
       created: moment(repo.created).format('dddd, MMMM Do YYYY'),
       updated: moment(repo.updated).format('dddd, MMMM Do YYYY'),
-      tsvFile
+      dataFile
     });
 
     res.render('details.tpl', { repo: repoData });
   }
 
-  _buildTSVFile({ userSlug, repoSlug, dates }) {
-    const filename = `${userSlug}-${repoSlug}.tsv`;
+  _buildCSVFile({ userSlug, repoSlug, dates }) {
+    const filename = `${userSlug}-${repoSlug}.csv`;
     const filePath = path.join(this._staticsPath, 'data', filename);
 
-    console.log('Building TSV file "%s"...', filePath);
+    console.log('Building CSV file "%s"...', filePath);
 
     const lines = Object.keys(dates)
       .sort()
-      .map(date => `${date}\t\t\t${dates[date]}`)
+      .map(date => `${date},${dates[date]}`)
       .join('\n');
 
-    const tsv = `date\t\t\tstars\n${lines}`;
+    const tsv = `date,stars\n${lines}`;
 
     fs.writeFileSync(filePath, tsv);
 

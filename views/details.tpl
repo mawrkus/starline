@@ -70,7 +70,7 @@
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.stars); });
 
-    d3.tsv("/data/{{ repo.tsvFile }}", function(d) {
+    d3.csv("/data/{{ repo.dataFile }}", function(d) {
       d.date = parseTime(d.date);
       d.stars = +d.stars;
       return d;
