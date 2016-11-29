@@ -8,12 +8,10 @@
     <title>💫 Starline - {{ repo.uri }}</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
-      .area {
-        fill: steelblue;
-      }
-      .bar {
-        fill: steelblue;
-        clip-path: url(#clip);
+      .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
       }
       .zoom {
         cursor: move;
@@ -56,6 +54,69 @@
     </div>
     <script src="/js/d3.v4.min.js"></script>
     <script>
+    var margin = { top: 20, right: 20, bottom: 110, left: 40 },
+        width = 1140 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom,
+        margin2 = { top: 20, bottom: 40 },
+        height2 = 200;
+
+    var x = d3.scaleBand().rangeRound([0, width]).paddingInner(0.05),
+        xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")),
+        y = d3.scaleLinear().range([height, 0]),
+        yAxis = d3.axisLeft(y),
+        x2 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.05),
+        xAxis2 = d3.axisBottom(x2).tickFormat(d3.timeFormat("%Y-%m-%d"));
+
+    var svg = d3.select("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    var	parseDate = d3.timeParse("%Y-%m-%d");
+
+    d3.csv("/data/{{ repo.dataFile }}", function(d) {
+      d.date = parseDate(d.date);
+      d.stars = +d.stars;
+      return d;
+    }, function(error, data) {
+      if (error) throw error;
+
+      x.domain(data.map(function(d) { return d.date; }));
+
+      var yMax = d3.max(data, function(d) { return d.stars; });
+      y.domain([0, yMax]);
+
+      var ticks = yMax > 10 ? 10 : yMax;
+      yAxis.ticks(ticks);
+
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+        .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+          .attr("transform", "rotate(-90)" );
+
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+      svg.selectAll("bar")
+          .data(data)
+        .enter().append("rect")
+          .style("fill", "steelblue")
+          .attr("x", function(d) { return x(d.date); })
+          .attr("width", x.bandwidth())
+          .attr("y", function(d) { return y(d.stars); })
+          .attr("height", function(d) { return height - y(d.stars); });
+
+    });
+    </script>
+    <!--script>
     var svg = d3.select("svg"),
         margin = {top: 20, right: 20, bottom: 110, left: 40},
         margin2 = {top: 530, right: 20, bottom: 30, left: 40},
@@ -125,13 +186,17 @@
       x2.domain(x.domain());
       y2.domain(y.domain());
 
+      var barPadding = 20;
+      var barWidth = Math.ceil(width / data.length) - barPadding;
+      if (barWidth < 0) barWidth = 1;
+
       focus.selectAll(".bar")
         .data(data)
         .enter().append("rect")
           .attr("class", "bar")
           .attr("x", function(d) { return x(d.date); })
           .attr("y", function(d) { return y(d.stars); })
-          .attr("width", width / data.length)
+          .attr("width", barWidth)
           .attr("height", function(d) { return height - y(d.stars); });
 
       focus.append("g")
@@ -143,18 +208,13 @@
           .attr("class", "axis axis--y")
           .call(yAxis);
 
-    /* context.append("path")
-        .datum(data)
-        .attr("class", "area")
-        .attr("d", area2); */
-
       context.selectAll(".bar")
         .data(data)
         .enter().append("rect")
           .attr("class", "bar")
           .attr("x", function(d) { return x(d.date); })
           .attr("y", function(d) { return y2(d.stars); })
-          .attr("width", width / data.length)
+          .attr("width", barWidth)
           .attr("height", function(d) { return height2 - y2(d.stars); });
 
       context.append("g")
@@ -167,6 +227,6 @@
           .call(brush)
           .call(brush.move, x.range());
     });
-    </script>
+  </script-->
   </body>
 </html>
