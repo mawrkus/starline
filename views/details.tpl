@@ -13,6 +13,9 @@
         stroke: #000;
         shape-rendering: crispEdges;
       }
+      .bar {
+        fill: steelblue;
+      }
       .zoom {
         cursor: move;
         fill: none;
