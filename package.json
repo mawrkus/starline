@@ -26,7 +26,7 @@
     "lowdb": "^0.14.0",
     "moment": "^2.24.0",
     "mustache-express": "^1.2.2",
-    "socket.io": "^1.5.1"
+    "socket.io": "^2.4.0"
   },
   "devDependencies": {
     "eslint": "^4.18.2",
